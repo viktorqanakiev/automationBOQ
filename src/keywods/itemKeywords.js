@@ -9,7 +9,7 @@ export const itemKeywords = [
   },
   {
     key: "дъга",
-    synonyms: ["коляно на 45 градуса"],
+    synonyms: ["коляно на 45 градуса", "дъги"],
   },
   {
     key: "муфа",

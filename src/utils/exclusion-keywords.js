@@ -1,4 +1,5 @@
 import { detectAllItems } from "../keywods/itemKeywords.js";
+import { detectMaterial } from "../keywods/materialKeywords.js";
 
 export const exclusionaryWords = [
   "изкоп",
@@ -50,13 +51,17 @@ export function markExcludedRows(rows) {
     const isItemRow = rowContainsItem(row);
     const itemKeywordsStr = isItemRow ? getItemKeywordsForRow(row) : "";
 
+    // Detect first material for this row
+    const rowText = row.map(normalizeText).join(" ");
+    const material = detectMaterial(rowText) || "";
+
     return {
       rowNumber: index + 1,
       values: row,
       isExcluded,
       isItemRow,
-      // NEW: comma-separated matched keywords (empty if not an item row)
       itemKeywords: itemKeywordsStr,
+      material, // single material string or ""
     };
   });
 }
