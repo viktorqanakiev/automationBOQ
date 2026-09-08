@@ -23,17 +23,14 @@ export const itemKeywords = [
     key: "тройник",
     synonyms: ["тедка", "тештик", "разклонение на 90 градуса"],
   },
-
   {
     key: "нипел",
     synonyms: [],
   },
-
   {
     key: "тапа",
     synonyms: [],
   },
-
   {
     key: "изолация",
     synonyms: ["топлоизолация", "изолационен материал"],
@@ -47,53 +44,50 @@ function normalizeText(text) {
     .replace(/\s+/g, " ");
 }
 
-// UPDATED: now checks both main key and synonyms
-// export function detectItem(rowText) {
-//   const normalized = normalizeText(rowText);
+function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
-//   for (const kw of itemKeywords) {
-//     const termsToCheck = [kw.key, ...kw.synonyms];
+/*
+  Matches a full term without matching it inside another word.
+  The letters range includes Bulgarian Cyrillic, Latin letters, and numbers.
+*/
+function containsWholeTerm(text, term) {
+  const escapedTerm = escapeRegExp(normalizeText(term));
+  const regex = new RegExp(
+    `(^|[^a-zа-я0-9])${escapedTerm}($|[^a-zа-я0-9])`,
+    "iu",
+  );
 
-//     for (const term of termsToCheck) {
-//       const normalizedTerm = normalizeText(term);
+  return regex.test(text);
+}
 
-//       if (normalized.includes(normalizedTerm)) {
-//         return kw.key;
-//       }
-//     }
-//   }
-
-//   return null;
-// }
-
-// Return all matched keys for a row as an array
-export function detectAllItems(rowText) {
+// Detect a single item: returns the first matched canonical key, otherwise null.
+export function detectItem(rowText) {
   const normalized = normalizeText(rowText);
-  const matchedKeys = [];
 
   for (const kw of itemKeywords) {
-    let matched = false;
+    const termsToCheck = [kw.key, ...kw.synonyms];
 
-    // Check main key
-    if (normalized.includes(normalizeText(kw.key))) {
-      matched = true;
-    }
-
-    // Check synonyms
-    if (!matched) {
-      for (const syn of kw.synonyms) {
-        const normalizedSyn = normalizeText(syn);
-        if (normalized.includes(normalizedSyn)) {
-          matched = true;
-          break;
-        }
+    for (const term of termsToCheck) {
+      if (containsWholeTerm(normalized, term)) {
+        return kw.key;
       }
-    }
-
-    if (matched) {
-      matchedKeys.push(kw.key);
     }
   }
 
-  return matchedKeys;
+  return null;
+}
+
+// Return every matched canonical item key in the row.
+export function detectAllItems(rowText) {
+  const normalized = normalizeText(rowText);
+
+  return itemKeywords
+    .filter((kw) => {
+      const termsToCheck = [kw.key, ...kw.synonyms];
+
+      return termsToCheck.some((term) => containsWholeTerm(normalized, term));
+    })
+    .map((kw) => kw.key);
 }

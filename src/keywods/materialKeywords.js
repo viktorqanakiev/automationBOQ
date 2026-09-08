@@ -5,7 +5,7 @@ export const materialKeywords = [
   },
   {
     key: "PPR",
-    synonyms: ["ppr", "pp-r", "полипропилен"],
+    synonyms: ["ppr", "pp-r", "полипропилен", "ппр"],
   },
   {
     key: "HDPE",
@@ -28,31 +28,38 @@ function normalizeText(text) {
     .replace(/\s+/g, " ");
 }
 
-// Detect a single material (first match), checking both key and synonyms
+function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/*
+  Matches a complete Bulgarian/Latin term, rather than matching a substring
+  inside another word (for example, "pe" inside "peshatn").
+*/
+function containsWholeTerm(text, term) {
+  const escapedTerm = escapeRegExp(normalizeText(term));
+
+  const regex = new RegExp(
+    `(^|[^a-zа-я0-9])${escapedTerm}($|[^a-zа-я0-9])`,
+    "iu",
+  );
+
+  return regex.test(text);
+}
+
+// Detect the first matching material, checking both key and synonyms.
 export function detectMaterial(rowText) {
   const normalized = normalizeText(rowText);
 
-  for (const kw of materialKeywords) {
-    const termsToCheck = [kw.key, ...kw.synonyms];
+  for (const material of materialKeywords) {
+    const termsToCheck = [material.key, ...material.synonyms];
 
     for (const term of termsToCheck) {
-      const normalizedTerm = normalizeText(term);
-
-      // Build a regex that matches the term as a whole word
-      // \b is a word boundary; "u" flag for Unicode
-      const pattern = `\\b${escapeRegExp(normalizedTerm)}\\b`;
-      const regex = new RegExp(pattern, "iu");
-
-      if (regex.test(normalized)) {
-        return kw.key;
+      if (containsWholeTerm(normalized, term)) {
+        return material.key;
       }
     }
   }
 
   return null;
-}
-
-// Helper to escape special regex characters in the term
-function escapeRegExp(str) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 }
