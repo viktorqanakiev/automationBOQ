@@ -17,6 +17,13 @@ function ReviewPage({ parsedRows }) {
 
       <div className="review-table-wrapper">
         <table className="review-table">
+          <thead>
+            <tr>
+              <th className="row-number-cell">#</th>
+              <th>Matched item keywords</th>
+              <th>Row data</th>
+            </tr>
+          </thead>
           <tbody>
             {parsedRows.map((row) => {
               const rowClass = row.isExcluded
@@ -28,9 +35,14 @@ function ReviewPage({ parsedRows }) {
               return (
                 <tr key={row.rowNumber} className={rowClass}>
                   <td className="row-number-cell">{row.rowNumber}</td>
-                  {row.values.map((value, cellIndex) => (
-                    <td key={`${row.rowNumber}-${cellIndex}`}>{value}</td>
-                  ))}
+                  <td>{row.itemKeywords || ""}</td>
+                  <td>
+                    {row.values.map((value, cellIndex) => (
+                      <div key={`${row.rowNumber}-${cellIndex}`}>
+                        {String(value)}
+                      </div>
+                    ))}
+                  </td>
                 </tr>
               );
             })}

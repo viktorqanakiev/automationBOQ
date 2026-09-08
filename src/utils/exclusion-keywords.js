@@ -1,4 +1,5 @@
 import { detectItem } from "../keywods/itemKeywords.js";
+import { detectAllItems } from "../keywods/itemKeywords.js";
 
 export const exclusionaryWords = [
   "изкоп",
@@ -32,19 +33,31 @@ export function rowContainsExclusionaryWord(row) {
   });
 }
 
-// NEW: check if the row contains any item keyword
 export function rowContainsItem(row) {
   const rowText = row.map(normalizeText).join(" ");
-  // detectItem returns the main key when a synonym is found, or null otherwise
-  return detectItem(rowText) !== null;
+  return detectAllItems(rowText).length > 0;
+}
+
+// NEW: get all matched item keys as a comma-separated string
+export function getItemKeywordsForRow(row) {
+  const rowText = row.map(normalizeText).join(" ");
+  const matchedKeys = detectAllItems(rowText);
+  return matchedKeys.join(", ");
 }
 
 export function markExcludedRows(rows) {
-  return rows.map((row, index) => ({
-    rowNumber: index + 1,
-    values: row,
-    isExcluded: rowContainsExclusionaryWord(row),
-    // NEW: flag item rows
-    isItemRow: rowContainsItem(row),
-  }));
+  return rows.map((row, index) => {
+    const isExcluded = rowContainsExclusionaryWord(row);
+    const isItemRow = rowContainsItem(row);
+    const itemKeywordsStr = isItemRow ? getItemKeywordsForRow(row) : "";
+
+    return {
+      rowNumber: index + 1,
+      values: row,
+      isExcluded,
+      isItemRow,
+      // NEW: comma-separated matched keywords (empty if not an item row)
+      itemKeywords: itemKeywordsStr,
+    };
+  });
 }

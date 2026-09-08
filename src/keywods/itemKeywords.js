@@ -21,7 +21,7 @@ export const itemKeywords = [
   },
   {
     key: "тройник",
-    synonyms: ["тедка", "тештик", "рзклонение на 90 градуса"],
+    synonyms: ["тедка", "тештик", "разклонение на 90 градуса"],
   },
 
   {
@@ -60,4 +60,36 @@ export function detectItem(rowText) {
   }
 
   return null;
+}
+
+// NEW: return all matched keys for a row as an array
+export function detectAllItems(rowText) {
+  const normalized = normalizeText(rowText);
+  const matchedKeys = [];
+
+  for (const kw of itemKeywords) {
+    let matched = false;
+
+    // Check main key
+    if (normalized.includes(normalizeText(kw.key))) {
+      matched = true;
+    }
+
+    // Check synonyms
+    if (!matched) {
+      for (const syn of kw.synonyms) {
+        const normalizedSyn = normalizeText(syn);
+        if (normalized.includes(normalizedSyn)) {
+          matched = true;
+          break;
+        }
+      }
+    }
+
+    if (matched) {
+      matchedKeys.push(kw.key);
+    }
+  }
+
+  return matchedKeys;
 }
