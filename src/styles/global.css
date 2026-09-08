@@ -402,6 +402,16 @@ button:focus-visible {
   border-color: #fca5a5;
 }
 
+/* NEW: item rows (rows containing itemKeywords) in green */
+.review-table .item-row {
+  background-color: #ecfdf3; /* light green */
+  color: #166534; /* dark green text */
+}
+
+.review-table .item-row td {
+  border-color: #bbf7d0; /* soft green border */
+}
+
 .row-number-cell {
   width: 56px;
   color: #64748b;

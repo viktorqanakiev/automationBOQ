@@ -1,3 +1,5 @@
+import { detectItem } from "../keywods/itemKeywords.js";
+
 export const exclusionaryWords = [
   "изкоп",
   "насип",
@@ -30,10 +32,19 @@ export function rowContainsExclusionaryWord(row) {
   });
 }
 
+// NEW: check if the row contains any item keyword
+export function rowContainsItem(row) {
+  const rowText = row.map(normalizeText).join(" ");
+  // detectItem returns the main key when a synonym is found, or null otherwise
+  return detectItem(rowText) !== null;
+}
+
 export function markExcludedRows(rows) {
   return rows.map((row, index) => ({
     rowNumber: index + 1,
     values: row,
     isExcluded: rowContainsExclusionaryWord(row),
+    // NEW: flag item rows
+    isItemRow: rowContainsItem(row),
   }));
 }
