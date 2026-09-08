@@ -47,22 +47,26 @@ function normalizeText(text) {
     .replace(/\s+/g, " ");
 }
 
-export function detectItem(rowText) {
-  const normalized = normalizeText(rowText);
+// UPDATED: now checks both main key and synonyms
+// export function detectItem(rowText) {
+//   const normalized = normalizeText(rowText);
 
-  for (const kw of itemKeywords) {
-    for (const syn of kw.synonyms) {
-      const normalizedSyn = normalizeText(syn);
-      if (normalized.includes(normalizedSyn)) {
-        return kw.key;
-      }
-    }
-  }
+//   for (const kw of itemKeywords) {
+//     const termsToCheck = [kw.key, ...kw.synonyms];
 
-  return null;
-}
+//     for (const term of termsToCheck) {
+//       const normalizedTerm = normalizeText(term);
 
-// NEW: return all matched keys for a row as an array
+//       if (normalized.includes(normalizedTerm)) {
+//         return kw.key;
+//       }
+//     }
+//   }
+
+//   return null;
+// }
+
+// Return all matched keys for a row as an array
 export function detectAllItems(rowText) {
   const normalized = normalizeText(rowText);
   const matchedKeys = [];

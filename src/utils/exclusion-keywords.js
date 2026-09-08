@@ -1,4 +1,3 @@
-import { detectItem } from "../keywods/itemKeywords.js";
 import { detectAllItems } from "../keywods/itemKeywords.js";
 
 export const exclusionaryWords = [
