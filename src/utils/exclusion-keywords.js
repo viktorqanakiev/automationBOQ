@@ -1,5 +1,6 @@
 import { detectAllItems } from "../keywods/itemKeywords.js";
 import { detectMaterial } from "../keywods/materialKeywords.js";
+import { detectAllDiameters } from "../keywods/diameterKeywords.js";
 
 export const exclusionaryWords = [
   "изкоп",
@@ -49,11 +50,14 @@ export function markExcludedRows(rows) {
   return rows.map((row, index) => {
     const isExcluded = rowContainsExclusionaryWord(row);
     const isItemRow = rowContainsItem(row);
-    const itemKeywordsStr = isItemRow ? getItemKeywordsForRow(row) : "";
 
-    // Detect first material for this row
     const rowText = row.map(normalizeText).join(" ");
+
+    const itemKeywordsStr = isItemRow ? detectAllItems(rowText).join(", ") : "";
+
     const material = detectMaterial(rowText) || "";
+    const allDiameters = detectAllDiameters(rowText);
+    const diameterStr = allDiameters.join(", ");
 
     return {
       rowNumber: index + 1,
@@ -61,7 +65,8 @@ export function markExcludedRows(rows) {
       isExcluded,
       isItemRow,
       itemKeywords: itemKeywordsStr,
-      material, // single material string or ""
+      material,
+      diameter: diameterStr,
     };
   });
 }

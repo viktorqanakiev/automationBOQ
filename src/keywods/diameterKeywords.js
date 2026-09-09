@@ -2,85 +2,85 @@ export const diameterKeywords = [
   // DN series (metric nominal diameter)
   {
     key: "DN15",
-    synonyms: ["dn15", "dn 15", "15 mm", "f15", "ø15", "15мм", "ф15"],
+    synonyms: ["dn15", "dn 15", "15 mm"],
   },
   {
     key: "DN20",
-    synonyms: ["dn20", "dn 20", "20 mm", "f20", "ø20", "20мм", "ф20"],
+    synonyms: ["dn20", "dn 20", "20 mm"],
   },
   {
     key: "DN25",
-    synonyms: ["dn25", "dn 25", "25 mm", "f25", "ø25", "25мм", "ф25"],
+    synonyms: ["dn25", "dn 25", "25 mm"],
   },
   {
     key: "DN32",
-    synonyms: ["dn32", "dn 32", "32 mm", "f32", "ø32", "32мм", "ф32"],
+    synonyms: ["dn32", "dn 32", "32 mm"],
   },
   {
     key: "DN40",
-    synonyms: ["dn40", "dn 40", "40 mm", "f40", "ø40", "40мм", "ф40"],
+    synonyms: ["dn40", "dn 40", "40 mm"],
   },
   {
     key: "DN50",
-    synonyms: ["dn50", "dn 50", "50 mm", "f50", "ø50", "50мм", "ф50"],
+    synonyms: ["dn50", "dn 50", "50 mm"],
   },
   {
     key: "DN65",
-    synonyms: ["dn65", "dn 65", "65 mm", "f65", "ø65", "65мм", "ф65"],
+    synonyms: ["dn65", "dn 65", "65 mm"],
   },
   {
     key: "DN80",
-    synonyms: ["dn80", "dn 80", "80 mm", "f80", "ø80", "80мм", "ф80"],
+    synonyms: ["dn80", "dn 80", "80 mm"],
   },
   {
     key: "DN100",
-    synonyms: ["dn100", "dn 100", "100 mm", "f100", "ø100", "100мм", "ф100"],
+    synonyms: ["dn100", "dn 100", "100 mm"],
   },
   {
     key: "DN125",
-    synonyms: ["dn125", "dn 125", "125 mm", "f125", "ø125", "125мм", "ф125"],
+    synonyms: ["dn125", "dn 125", "125 mm"],
   },
   {
     key: "DN150",
-    synonyms: ["dn150", "dn 150", "150 mm", "f150", "ø150", "150мм", "ф150"],
+    synonyms: ["dn150", "dn 150", "150 mm"],
   },
   {
     key: "DN200",
-    synonyms: ["dn200", "dn 200", "200 mm", "f200", "ø200", "200мм", "ф200"],
+    synonyms: ["dn200", "dn 200", "200 mm"],
   },
 
   // Additional ф20–ф90 series (explicit entries with Cyrillic Ф)
   {
     key: "Ф20",
-    synonyms: ["f20", "ф20", "ø20", "20 mm", "20мм"],
+    synonyms: ["f20", "ф20", "ø20"],
   },
   {
     key: "Ф25",
-    synonyms: ["f25", "ф25", "ø25", "25 mm", "25мм"],
+    synonyms: ["f25", "ф25", "ø25"],
   },
   {
     key: "Ф32",
-    synonyms: ["f32", "ф32", "ø32", "32 mm", "32мм"],
+    synonyms: ["f32", "ф32", "ø32"],
   },
   {
     key: "Ф40",
-    synonyms: ["f40", "ф40", "ø40", "40 mm", "40мм"],
+    synonyms: ["f40", "ф40", "ø40"],
   },
   {
     key: "Ф50",
-    synonyms: ["f50", "ф50", "ø50", "50 mm", "50мм"],
+    synonyms: ["f50", "ф50", "ø50"],
   },
   {
     key: "Ф63",
-    synonyms: ["f63", "ф63", "ø63", "63 mm", "63мм"],
+    synonyms: ["f63", "ф63", "ø63"],
   },
   {
     key: "Ф75",
-    synonyms: ["f75", "ф75", "ø75", "75 mm", "75мм"],
+    synonyms: ["f75", "ф75", "ø75"],
   },
   {
     key: "Ф90",
-    synonyms: ["f90", "ф90", "ø90", "90 mm", "90мм"],
+    synonyms: ["f90", "ф90", "ø90"],
   },
 
   // Inch-based sizes using " symbol and "цол"
@@ -142,20 +142,36 @@ function normalizeText(text) {
     .replace(/°/g, " deg")
     .replace(/"/g, " цол ")
     .replace(/″/g, " цол ")
-    .replace(/“/g, " цол ");
+    .replace(/"/g, " цол ");
 }
 
-export function detectDiameter(rowText) {
+function escapeRegExp(str) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/*
+  Matches a complete Bulgarian/Latin term, rather than matching a substring
+  inside another word.
+*/
+function containsWholeTerm(text, term) {
+  const escapedTerm = escapeRegExp(normalizeText(term));
+
+  const regex = new RegExp(
+    `(^|[^a-zа-я0-9])${escapedTerm}($|[^a-zа-я0-9])`,
+    "iu",
+  );
+
+  return regex.test(text);
+}
+
+// Detect ALL diameters in the row, checking both keys and synonyms.
+export function detectAllDiameters(rowText) {
   const normalized = normalizeText(rowText);
 
-  for (const kw of diameterKeywords) {
-    for (const syn of kw.synonyms) {
-      const normalizedSyn = normalizeText(syn);
-      if (normalized.includes(normalizedSyn)) {
-        return kw.key;
-      }
-    }
-  }
-
-  return null;
+  return diameterKeywords
+    .filter((d) => {
+      const termsToCheck = [d.key, ...d.synonyms];
+      return termsToCheck.some((term) => containsWholeTerm(normalized, term));
+    })
+    .map((d) => d.key);
 }

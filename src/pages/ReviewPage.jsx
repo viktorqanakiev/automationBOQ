@@ -22,6 +22,7 @@ function ReviewPage({ parsedRows }) {
               <th className="row-number-cell">#</th>
               <th>Matched item keywords</th>
               <th>Material</th>
+              <th>Diameter</th>
               <th>Row data</th>
             </tr>
           </thead>
@@ -36,8 +37,9 @@ function ReviewPage({ parsedRows }) {
               return (
                 <tr key={row.rowNumber} className={rowClass}>
                   <td className="row-number-cell">{row.rowNumber}</td>
-                  <td>{row.itemKeywords || ""}</td>
-                  <td>{row.material || ""}</td>
+                  <td>{row.itemKeywords || "-"}</td>
+                  <td>{row.material || "-"}</td>
+                  <td>{row.diameter || "-"}</td>
                   <td>
                     {row.values.map((value, cellIndex) => (
                       <div key={`${row.rowNumber}-${cellIndex}`}>
