@@ -10,6 +10,7 @@ function ReviewPage({ parsedRows }) {
   return (
     <section className="process-card review-card">
       <h2>Parsed Excel Data</h2>
+
       <p>
         Rows containing exclusionary words are shown in red. Rows containing
         known item keywords are shown in green.
@@ -23,9 +24,12 @@ function ReviewPage({ parsedRows }) {
               <th>Matched item keywords</th>
               <th>Material</th>
               <th>Diameter</th>
+              <th>Unit</th>
+              <th>Quantity</th>
               <th>Row data</th>
             </tr>
           </thead>
+
           <tbody>
             {parsedRows.map((row) => {
               const rowClass = row.isExcluded
@@ -37,9 +41,17 @@ function ReviewPage({ parsedRows }) {
               return (
                 <tr key={row.rowNumber} className={rowClass}>
                   <td className="row-number-cell">{row.rowNumber}</td>
+
                   <td>{row.itemKeywords || "-"}</td>
+
                   <td>{row.material || "-"}</td>
+
                   <td>{row.diameter || "-"}</td>
+
+                  <td>{row.quantityUnit || "-"}</td>
+
+                  <td>{row.quantity || "-"}</td>
+
                   <td>
                     {row.values.map((value, cellIndex) => (
                       <div key={`${row.rowNumber}-${cellIndex}`}>

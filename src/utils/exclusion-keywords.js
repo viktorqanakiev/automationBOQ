@@ -1,6 +1,7 @@
 import { detectAllItems } from "../keywods/itemKeywords.js";
 import { detectMaterial } from "../keywods/materialKeywords.js";
 import { detectAllDiameters } from "../keywods/diameterKeywords.js";
+import { extractQuantityFromRow } from "../keywods/quantityUnitKeywords.js";
 
 export const exclusionaryWords = [
   "изкоп",
@@ -48,25 +49,35 @@ export function getItemKeywordsForRow(row) {
 
 export function markExcludedRows(rows) {
   return rows.map((row, index) => {
-    const isExcluded = rowContainsExclusionaryWord(row);
-    const isItemRow = rowContainsItem(row);
-
     const rowText = row.map(normalizeText).join(" ");
 
-    const itemKeywordsStr = isItemRow ? detectAllItems(rowText).join(", ") : "";
+    const isExcluded = rowContainsExclusionaryWord(row);
+
+    const matchedItemKeywords = detectAllItems(rowText);
+    const isItemRow = matchedItemKeywords.length > 0;
+
+    const itemKeywordsStr = matchedItemKeywords.join(", ");
 
     const material = detectMaterial(rowText) || "";
-    const allDiameters = detectAllDiameters(rowText);
-    const diameterStr = allDiameters.join(", ");
+
+    const matchedDiameters = detectAllDiameters(rowText);
+    const diameterStr = matchedDiameters.join(", ");
+
+    const { quantityUnit, quantity } = extractQuantityFromRow(row);
 
     return {
       rowNumber: index + 1,
       values: row,
+
       isExcluded,
       isItemRow,
+
       itemKeywords: itemKeywordsStr,
       material,
       diameter: diameterStr,
+
+      quantityUnit,
+      quantity,
     };
   });
 }
