@@ -1,3 +1,65 @@
+function escapeCsvValue(value) {
+  const text = String(value ?? "");
+
+  // CSV rules:
+  // - double quotes inside a value become two double quotes
+  // - values containing separators, quotes, or line breaks are wrapped in quotes
+  const escapedText = text.replace(/"/g, '""');
+
+  if (
+    escapedText.includes(";") ||
+    escapedText.includes(",") ||
+    escapedText.includes('"') ||
+    escapedText.includes("\n") ||
+    escapedText.includes("\r")
+  ) {
+    return `"${escapedText}"`;
+  }
+
+  return escapedText;
+}
+
+function generateCsvContent(rows) {
+  // Semicolon is used because Excel commonly expects it in European locales.
+  const separator = ";";
+
+  const header = ["Material", "Item", "Diameter", "Unit", "Quantity"];
+
+  const csvRows = rows.map((row) => {
+    const values = [
+      row.material,
+      row.itemKeywords,
+      row.diameter,
+      row.quantityUnit,
+      row.quantity,
+    ];
+
+    return values.map(escapeCsvValue).join(separator);
+  });
+
+  // BOM helps Excel correctly recognize UTF-8 Bulgarian text.
+  return "\uFEFF" + [header.join(separator), ...csvRows].join("\r\n");
+}
+
+function downloadCsv(rows) {
+  const csvContent = generateCsvContent(rows);
+
+  const blob = new Blob([csvContent], {
+    type: "text/csv;charset=utf-8;",
+  });
+
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+
+  link.href = url;
+  link.download = "boq-export.csv";
+  document.body.appendChild(link);
+  link.click();
+
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
+
 function ReviewPage({ parsedRows }) {
   if (!parsedRows?.length) {
     return (
@@ -9,12 +71,24 @@ function ReviewPage({ parsedRows }) {
 
   return (
     <section className="process-card review-card">
-      <h2>Parsed Excel Data</h2>
+      <div className="review-heading">
+        <div>
+          <h2>Parsed Excel Data</h2>
 
-      <p>
-        Rows containing exclusionary words are shown in red. Rows containing
-        known item keywords are shown in green.
-      </p>
+          <p>
+            Rows containing exclusionary words are shown in red. Rows containing
+            known item keywords are shown in green.
+          </p>
+        </div>
+
+        <button
+          type="button"
+          className="generate-csv-button"
+          onClick={() => downloadCsv(parsedRows)}
+        >
+          Generate CSV
+        </button>
+      </div>
 
       <div className="review-table-wrapper">
         <table className="review-table">

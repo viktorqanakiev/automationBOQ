@@ -427,3 +427,49 @@ button:focus-visible {
   background: #fef2f2;
   color: #b91c1c;
 }
+.review-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.review-heading h2 {
+  margin: 0 0 6px;
+}
+
+.review-heading p {
+  margin: 0;
+  color: #758194;
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.generate-csv-button {
+  flex: 0 0 auto;
+  padding: 9px 13px;
+  color: #ffffff;
+  background: #147f78;
+  border: 1px solid #147f78;
+  border-radius: 7px;
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.generate-csv-button:hover {
+  background: #0f6963;
+  border-color: #0f6963;
+}
+
+@media (max-width: 620px) {
+  .review-heading {
+    flex-direction: column;
+  }
+
+  .generate-csv-button {
+    width: 100%;
+  }
+}
