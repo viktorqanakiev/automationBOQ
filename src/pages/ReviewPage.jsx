@@ -25,7 +25,10 @@ function generateCsvContent(rows) {
 
   const header = ["Material", "Item", "Diameter", "Unit", "Quantity"];
 
-  const csvRows = rows.map((row) => {
+  // Export only rows that do NOT contain an exclusionary word.
+  const allowedRows = rows.filter((row) => !row.isExcluded);
+
+  const csvRows = allowedRows.map((row) => {
     const values = [
       row.material,
       row.itemKeywords,
